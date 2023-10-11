@@ -1,24 +1,60 @@
-import React, { useEffect, useState } from "react";
-import { fetchFileSystemData } from "../../features/fileSystem/fileSystemSlice";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AiFillFolder, AiFillFolderOpen } from "react-icons/ai";
+import { fetchFileSystemData } from "../../features/fileSystem/fileSystemSlice";
 import Loading from "../Loading";
+import FolderItem from "./Folder";
 
 const FileSystem: React.FC = () => {
   const dispatch = useDispatch();
-  const fileSystemData = useSelector((state: any) => state.fileSystem.data);
   const isLoading = useSelector((state: any) => state.fileSystem.isLoading);
-
-  const [shownPortfoliosForChild, setShownPortfoliosForChild] = useState<
-    string | null
-  >(null);
-  const [mainFolderOpen, setMainFolderOpen] = useState(false); // Ana klasörün açılıp kapanmasını kontrol eder
+  const [folders, setFolders] = useState<any[]>([]);
+  const [openFolders, setOpenFolders] = useState<string[]>([]);
 
   useEffect(() => {
-    dispatch(fetchFileSystemData());
-  }, []);
+    async function fetchData() {
+      const data = await dispatch(fetchFileSystemData());
+      if (data.payload) {
+        setFolders(data.payload.childs);
+      }
+    }
+    fetchData();
+  }, [dispatch]);
 
-  const items = fileSystemData?.childs || [];
+  const handleFolderClick = async (id: string, isFolder: boolean) => {
+    if (!isFolder) return;
+
+    const data = await dispatch(fetchFileSystemData(id));
+    if (data.payload) {
+      const updateChilds = (folders: any) => {
+        return folders.map((folder: any) => {
+          if (folder.id === id) {
+            return {
+              ...folder,
+              childs: data.payload.childs,
+            };
+          }
+          if (folder.childs) {
+            return {
+              ...folder,
+              childs: updateChilds(folder.childs),
+            };
+          }
+          return folder;
+        });
+      };
+
+      setFolders(updateChilds(folders));
+      toggleOpenFolder(id);
+    }
+  };
+
+  const toggleOpenFolder = (id: string) => {
+    if (openFolders.includes(id)) {
+      setOpenFolders((prev) => prev.filter((folderId) => folderId !== id));
+    } else {
+      setOpenFolders((prev) => [...prev, id]);
+    }
+  };
 
   return (
     <div className="m-[100px]">
@@ -27,41 +63,14 @@ const FileSystem: React.FC = () => {
       </h1>
       {isLoading && <Loading />}
       <ul>
-        <li>
-          <button onClick={() => setMainFolderOpen(!mainFolderOpen)}>
-            {mainFolderOpen ? <AiFillFolderOpen /> : <AiFillFolder />}
-          </button>
-          {fileSystemData.name}
-          {mainFolderOpen && (
-            <ul>
-              {items.map((item: any) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() =>
-                      setShownPortfoliosForChild(
-                        shownPortfoliosForChild === item.id ? null : item.id
-                      )
-                    }
-                  >
-                    {shownPortfoliosForChild === item.id ? (
-                      <AiFillFolderOpen />
-                    ) : (
-                      <AiFillFolder />
-                    )}
-                  </button>
-                  {item.name}
-                  {shownPortfoliosForChild === item.id && item.portfolios && (
-                    <ul>
-                      {item.portfolios.map((portfolio: any) => (
-                        <li key={portfolio.id}>{portfolio.name}</li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
+        {folders.map((folder) => (
+          <FolderItem
+            key={folder.id}
+            folder={folder}
+            handleFolderClick={handleFolderClick}
+            openFolders={openFolders}
+          />
+        ))}
       </ul>
     </div>
   );

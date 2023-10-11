@@ -31,15 +31,15 @@ const JWT_TOKEN = import.meta.env.VITE_JWT_TOKEN;
 
 export const fetchFileSystemData = createAsyncThunk(
   "fileSystem/fetchData",
-  async () => {
-    const response = await axios.get(
-      "https://dmstest.hexaworks.com/viewstore?pagenumber=1&countperpage=50",
-      {
-        headers: {
-          Authorization: `Bearer ${JWT_TOKEN}`,
-        },
-      }
-    );
+  async (id?: string) => {
+    const url = id
+      ? `https://dmstest.hexaworks.com/viewstore/${id}?pagenumber=1&countperpage=50`
+      : "https://dmstest.hexaworks.com/viewstore?pagenumber=1&countperpage=50";
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${JWT_TOKEN}`,
+      },
+    });
     return response.data;
   }
 );
