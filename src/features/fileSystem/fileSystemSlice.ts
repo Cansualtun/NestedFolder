@@ -28,13 +28,15 @@ const initialState: FileSystemState = {
   error: null,
 };
 const JWT_TOKEN = import.meta.env.VITE_JWT_TOKEN;
-
 export const fetchFileSystemData = createAsyncThunk(
   "fileSystem/fetchData",
-  async (id?: string) => {
+  async (
+    params: { id?: string; pageNumber?: number; countPerPage?: number } = {}
+  ) => {
+    const { id, pageNumber = 1, countPerPage } = params;
     const url = id
-      ? `https://dmstest.hexaworks.com/viewstore/${id}?pagenumber=1&countperpage=50`
-      : "https://dmstest.hexaworks.com/viewstore?pagenumber=1&countperpage=50";
+      ? `https://dmstest.hexaworks.com/viewstore/${id}?pagenumber=${pageNumber}&countperpage=${countPerPage}`
+      : `https://dmstest.hexaworks.com/viewstore?pagenumber=${pageNumber}&countperpage=${countPerPage}`;
     const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${JWT_TOKEN}`,
