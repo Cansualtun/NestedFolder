@@ -26,7 +26,12 @@ const FolderListComponent: React.FC<{
       ))}
     </ul>
     {folders.length < totalCount && (
-      <button onClick={handleLoadMore}>Load More</button>
+      <button
+        className="w-full text-white bg-primary-button hover:bg-gray-900 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2"
+        onClick={handleLoadMore}
+      >
+        Load More
+      </button>
     )}
   </>
 );

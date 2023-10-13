@@ -57,7 +57,7 @@ const fileSystemSlice = createSlice({
     });
     builder.addCase(
       fetchFileSystemData.fulfilled,
-      (state, action: PayloadAction<any[]>) => {
+      (state, action: PayloadAction<MainObject>) => {
         state.isLoading = false;
         state.data = action.payload;
       }

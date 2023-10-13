@@ -9,7 +9,8 @@ export default {
     colors:{
       primary:{
         folder : "#eab308",
-        file: "#0096FF"
+        file: "#0096FF",
+        button : "#FFBF00",
       },
     },
     extend: {},
